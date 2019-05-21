@@ -1,0 +1,137 @@
+<?xml version='1.0' encoding='utf-8'?>
+<plugin id="cordova-plugin-wiskind-lbs" version="1.0.0" 
+    xmlns="http://apache.org/cordova/ns/plugins/1.0" 
+    xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 引擎 -->
+    <engines>
+        <engine name="cordova" version=">=7.1.0" />
+        <engine name="cordova-android" version=">=6.3.0" />
+        <engine name="cordova-ios" version=">=4.5.4" />
+    </engines>
+    <name>lbs</name>
+    <!-- JS模块 -->
+    <js-module name="lbs" src="www/lbs.js">
+        <clobbers target="cordova.plugins.wiskind.lbs" />
+    </js-module>
+    <!-- Android平台 -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="WiskindLBS">
+                <param name="android-package" value="cn.wiskind.lbs.WiskindLBS" />
+                <param name="onload" value="true" />
+            </feature>
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/*">
+            <!-- 这个权限用于进行网络定位-->
+            <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+            <!-- 这个权限用于访问GPS定位-->
+            <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+            <!-- 用于访问wifi网络信息，wifi信息会用于进行网络定位-->
+            <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+            <!-- 获取运营商信息，用于支持提供运营商信息相关的接口-->
+            <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+            <!-- 这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位-->
+            <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+            <!-- 用于读取手机当前的状态-->
+            <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+            <!-- 写入扩展存储，向扩展卡写入数据，用于写入离线定位数据-->
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+            <!-- 访问网络，网络定位需要上网-->
+            <uses-permission android:name="android.permission.INTERNET" />
+            <!-- SD卡读取权限，用户写入离线定位数据-->
+            <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+        </config-file>
+        <config-file target="AndroidManifest.xml" parent="/manifest/application">
+            <!-- 添加百度AK，进行AK鉴权 -->
+            <meta-data android:name="com.baidu.lbsapi.API_KEY" android:value="$ANDROID_KEY" />
+            <!-- 在Application标签中声明百度Android定位service组件，每个App拥有自己单独的定位service -->
+            <service android:name="com.baidu.location.f" android:enabled="true" android:process=":remote" />
+        </config-file>
+        <!-- 源文件 -->
+        <source-file src="src/android/NotificationUtils.java" target-dir="src/cn/wiskind/lbs" />
+        <source-file src="src/android/SoundUtils.java" target-dir="src/cn/wiskind/lbs" />
+        <source-file src="src/android/LBSCont.java" target-dir="src/cn/wiskind/lbs" />
+        <source-file src="src/android/LBSDbHelper.java" target-dir="src/cn/wiskind/lbs" />
+        <source-file src="src/android/WiskindLBS.java" target-dir="src/cn/wiskind/lbs" />
+        <!-- 资源 -->
+        <source-file src="raw/android/gps_weak.mp3" target-dir="res/raw" />
+        <source-file src="raw/android/silence.mp3" target-dir="res/raw" />
+        <!-- 添加百度Android定位SDK -->
+        <source-file src="libs/android/BaiduLoc_AndroidSDK_v7.3/armeabi/liblocSDK7b.so" target-dir="libs/armeabi" />
+        <source-file src="libs/android/BaiduLoc_AndroidSDK_v7.3/armeabi-v7a/liblocSDK7b.so" target-dir="libs/armeabi-v7a" />
+        <source-file src="libs/android/BaiduLoc_AndroidSDK_v7.3/arm64-v8a/liblocSDK7b.so" target-dir="libs/arm64-v8a" />
+        <source-file src="libs/android/BaiduLoc_AndroidSDK_v7.3/x86/liblocSDK7b.so" target-dir="libs/x86" />
+        <source-file src="libs/android/BaiduLoc_AndroidSDK_v7.3/x86_64/liblocSDK7b.so" target-dir="libs/x86_64" />
+        <source-file src="libs/android/BaiduLoc_AndroidSDK_v7.3/BaiduLBS_Android.jar" target-dir="libs" />
+    </platform>
+    <!-- iOS平台 -->
+    <platform name="ios">
+        <config-file parent="/*" target="config.xml">
+            <feature name="WiskindLBS">
+                <param name="ios-package" value="WiskindLBS" />
+                <param name="onload" value="true"/>
+            </feature>
+        </config-file>
+        <!-- NSLocationWhenInUseUsageDescription：表示应用在前台的时候可以搜到更新的位置信息； -->
+        <config-file parent="NSLocationWhenInUseUsageDescription" target="*-Info.plist">
+            <string>$IOS_LOCATION_DESC</string>
+        </config-file>
+        <!-- NSLocationAlwaysUsageDescription：表示应用在前台和后台（suspend 或 terminated）都可以获取到更新的位置数据； -->
+        <config-file parent="NSLocationAlwaysUsageDescription" target="*-Info.plist">
+            <string>$IOS_LOCATION_DESC</string>
+        </config-file>
+        <!-- NSLocationAlwaysAndWhenInUseUsageDescription：申请Always权限，以便应用在前台和后台（suspend 或 terminated）都可以获取到更新的位置数据（NSLocationWhenInUseUsageDescription 也必须有）。 -->
+        <config-file parent="NSLocationAlwaysAndWhenInUseUsageDescription" target="*-Info.plist">
+            <string>$IOS_LOCATION_DESC</string>
+        </config-file>
+        <!-- 配置后台模式 -->
+        <config-file target="*-Info.plist" parent="UIBackgroundModes">
+            <array>
+                <!-- 声音 -->
+                <string>audio</string>
+                <!-- 定位 -->
+                <string>location</string>
+            </array>
+        </config-file>
+        <!--  添加App Transport Security Settings字段 -->
+        <config-file parent="NSAppTransportSecurity" target="*-Info.plist">
+            <dict>
+                <key>NSAllowsArbitraryLoads</key>
+                <true/>
+            </dict>
+        </config-file>
+        <!-- 添加百度AK -->
+        <config-file parent="BaiduLoc" target="*-Info.plist">
+            <dict>
+                <key>AK</key>
+                <string>$IOS_KEY</string>
+            </dict>
+        </config-file>
+        <!-- 源文件 -->
+        <source-file src="src/ios/WiskindLBS.mm" />
+        <source-file src="src/ios/WiskindLBSDBHelper.h" />
+        <source-file src="src/ios/WiskindLBSDBHelper.m" />
+        <!-- 资源文件 -->
+        <resource-file src="raw/ios/loc_data_error.mp3" />
+        <resource-file src="raw/ios/loc_db_error.mp3" />
+        <resource-file src="raw/ios/loc_service_error.mp3" />
+        <resource-file src="raw/ios/loc_service_disabled.mp3" />
+        <resource-file src="raw/ios/loc_service_unauthed.mp3" />
+        <resource-file src="raw/ios/loc_silence.wav" />
+        <!-- 添加百度iOS定位SDK依赖库 -->
+        <framework src="libs/ios/BaiduLoc_iOSSDK_v1.1/BMKLocationKit.framework" custom="true" />
+        <!-- 添加FMDB动态库 -->
+        <framework src="libs/ios/fmdb-2.7.4/FMDB.framework" custom="true" embed="true" />
+        <!-- 引入系统库文件 -->
+        <framework src="CoreLocation.framework" />
+        <framework src="SystemConfiguration.framework" />
+        <framework src="Security.framework" />
+        <framework src="libsqlite3.0.tbd" />
+        <framework src="CoreTelephony.framework" />
+        <framework src="libstdc++.6.0.9.tbd" />
+        <framework src="AdSupport.framework" />
+    </platform>
+    <preference name="ANDROID_KEY" default="" />
+    <preference name="IOS_KEY" default="" />
+    <preference name="IOS_LOCATION_DESC" default="请点击“允许”以允许访问。" />
+</plugin>
